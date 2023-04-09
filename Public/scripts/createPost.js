@@ -1,5 +1,5 @@
 $.ajax({
-    url: "/api/categories/",
+    url: "/api/comments/",
     type: "GET",
     contentType: "application/json; charset=utf-8"
   }).then(function (response) {
@@ -12,8 +12,8 @@ $.ajax({
                    };
       dataToReturn.push(newTag);
     }
-    $("#categories").select2({
-      placeholder: "Select Categories for the Post",
+    $("#comments").select2({
+      placeholder: "Select Comments for the Post",
       tags: true,
       tokenSeparators: [','],
       data: dataToReturn

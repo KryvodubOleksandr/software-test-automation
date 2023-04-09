@@ -14,7 +14,7 @@ struct WebsiteController: RouteCollection {
     authSessionsRoutes.get(use: indexHandler)
     authSessionsRoutes.get("posts", ":postID", use: postHandler)
     authSessionsRoutes.get("users", ":userID", use: userHandler)
-    authSessionsRoutes.get("categories", ":categoryID", use: categoryHandler)
+    authSessionsRoutes.get("comments", ":commentID", use: commentHandler)
     
     let protectedRoutes = authSessionsRoutes.grouped(User.redirectMiddleware(path: "/login"))
     protectedRoutes.get("posts", "create", use: renderCreatePostHandler)
@@ -36,13 +36,13 @@ struct WebsiteController: RouteCollection {
   func postHandler(_ req: Request) -> EventLoopFuture<View> {
     Post.find(req.parameters.get("postID"), on: req.db).unwrap(or: Abort(.notFound)).flatMap { post in
       let userFuture = post.$user.get(on: req.db)
-      let categoriesFuture = post.$categories.query(on: req.db).all()
-      return userFuture.and(categoriesFuture).flatMap { user, categories in
+      let commentsFuture = post.$comments.query(on: req.db).all()
+      return userFuture.and(commentsFuture).flatMap { user, comments in
         let context = PostContext(
           title: post.title,
           post: post,
           user: user,
-          categories: categories)
+          comments: comments)
         return req.view.render("post", context)
       }
     }
@@ -57,11 +57,11 @@ struct WebsiteController: RouteCollection {
     }
   }
   
-  func categoryHandler(_ req: Request) -> EventLoopFuture<View> {
-    Category.find(req.parameters.get("categoryID"), on: req.db).unwrap(or: Abort(.notFound)).flatMap { category in
-      category.$posts.get(on: req.db).flatMap { posts in
-        let context = CategoryContext(title: category.name, category: category, posts: posts)
-        return req.view.render("category", context)
+  func commentHandler(_ req: Request) -> EventLoopFuture<View> {
+    Comment.find(req.parameters.get("commentID"), on: req.db).unwrap(or: Abort(.notFound)).flatMap { comment in
+      comment.$posts.get(on: req.db).flatMap { posts in
+        let context = CommentContext(title: comment.name, comment: comment, posts: posts)
+        return req.view.render("comment", context)
       }
     }
   }
@@ -91,19 +91,19 @@ struct WebsiteController: RouteCollection {
       guard let id = post.id else {
         return req.eventLoop.future(error: Abort(.internalServerError))
       }
-      var categorySaves: [EventLoopFuture<Void>] = []
-      for category in data.categories ?? [] {
-        categorySaves.append(Category.addCategory(category, to: post, on: req))
+      var commentSaves: [EventLoopFuture<Void>] = []
+      for comment in data.comments ?? [] {
+        commentSaves.append(Comment.addComment(comment, to: post, on: req))
       }
       let redirect = req.redirect(to: "/posts/\(id)")
-      return categorySaves.flatten(on: req.eventLoop).transform(to: redirect)
+      return commentSaves.flatten(on: req.eventLoop).transform(to: redirect)
     }
   }
   
   func renderEditPostHandler(_ req: Request) -> EventLoopFuture<View> {
     return Post.find(req.parameters.get("postID"), on: req.db).unwrap(or: Abort(.notFound)).flatMap { post in
-      post.$categories.get(on: req.db).flatMap { categories in
-        let context = EditPostContext(post: post, categories: categories)
+      post.$comments.get(on: req.db).flatMap { comments in
+        let context = EditPostContext(post: post, comments: comments)
         return req.view.render("createPost", context)
       }
     }
@@ -121,35 +121,35 @@ struct WebsiteController: RouteCollection {
         return req.eventLoop.future(error: Abort(.internalServerError))
       }
       return post.save(on: req.db).flatMap {
-        post.$categories.get(on: req.db)
-      }.flatMap { existingCategories in
-        let existingStringArray = existingCategories.map {
+        post.$comments.get(on: req.db)
+      }.flatMap { existingComments in
+        let existingStringArray = existingComments.map {
           $0.name
         }
         
         let existingSet = Set<String>(existingStringArray)
-        let newSet = Set<String>(updateData.categories ?? [])
+        let newSet = Set<String>(updateData.comments ?? [])
         
-        let categoriesToAdd = newSet.subtracting(existingSet)
-        let categoriesToRemove = existingSet.subtracting(newSet)
+        let commentsToAdd = newSet.subtracting(existingSet)
+        let commentsToRemove = existingSet.subtracting(newSet)
         
-        var categoryResults: [EventLoopFuture<Void>] = []
-        for newCategory in categoriesToAdd {
-          categoryResults.append(Category.addCategory(newCategory, to: post, on: req))
+        var commentResults: [EventLoopFuture<Void>] = []
+        for newComment in commentsToAdd {
+          commentResults.append(Comment.addComment(newComment, to: post, on: req))
         }
         
-        for categoryNameToRemove in categoriesToRemove {
-          let categoryToRemove = existingCategories.first {
-            $0.name == categoryNameToRemove
+        for commentNameToRemove in commentsToRemove {
+          let commentToRemove = existingComments.first {
+            $0.name == commentNameToRemove
           }
-          if let category = categoryToRemove {
-            categoryResults.append(
-              post.$categories.detach(category, on: req.db))
+          if let comment = commentToRemove {
+            commentResults.append(
+              post.$comments.detach(comment, on: req.db))
           }
         }
         
         let redirect = req.redirect(to: "/posts/\(id)")
-        return categoryResults.flatten(on: req.eventLoop).transform(to: redirect)
+        return commentResults.flatten(on: req.eventLoop).transform(to: redirect)
       }
     }
   }
@@ -231,7 +231,7 @@ struct PostContext: Encodable {
   let title: String
   let post: Post
   let user: User
-  let categories: [Category]
+  let comments: [Comment]
 }
 
 struct UserContext: Encodable {
@@ -240,9 +240,9 @@ struct UserContext: Encodable {
   let posts: [Post]
 }
 
-struct CategoryContext: Encodable {
+struct CommentContext: Encodable {
   let title: String
-  let category: Category
+  let comment: Comment
   let posts: [Post]
 }
 
@@ -255,13 +255,13 @@ struct EditPostContext: Encodable {
   let title = "Edit Post"
   let post: Post
   let editing = true
-  let categories: [Category]
+  let comments: [Comment]
 }
 
 struct CreatePostFormData: Content {
   let title: String
   let body: String
-  let categories: [String]?
+  let comments: [String]?
   let csrfToken: String?
 }
 

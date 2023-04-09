@@ -10,7 +10,7 @@ struct PostsController: RouteCollection {
     postsRoutes.get("first", use: getFirstHandler)
     postsRoutes.get("sorted", use: sortedHandler)
     postsRoutes.get(":postID", "user", use: getUserHandler)
-    postsRoutes.get(":postID", "categories", use: getCategoriesHandler)
+    postsRoutes.get(":postID", "comments", use: getCommentsHandler)
 
     let tokenAuthMiddleware = Token.authenticator()
     let guardAuthMiddleware = User.guardMiddleware()
@@ -18,8 +18,8 @@ struct PostsController: RouteCollection {
     tokenAuthGroup.post(use: createHandler)
     tokenAuthGroup.delete(":postID", use: deleteHandler)
     tokenAuthGroup.put(":postID", use: updateHandler)
-    tokenAuthGroup.post(":postID", "categories", ":categoryID", use: addCategoriesHandler)
-    tokenAuthGroup.delete(":postID", "categories", ":categoryID", use: removeCategoriesHandler)
+    tokenAuthGroup.post(":postID", "comments", ":commentID", use: addCommentsHandler)
+    tokenAuthGroup.delete(":postID", "comments", ":commentID", use: removeCommentsHandler)
   }
 
   func getAllHandler(_ req: Request) -> EventLoopFuture<[Post]> {
@@ -92,27 +92,27 @@ struct PostsController: RouteCollection {
     }
   }
 
-  func addCategoriesHandler(_ req: Request) -> EventLoopFuture<HTTPStatus> {
+  func addCommentsHandler(_ req: Request) -> EventLoopFuture<HTTPStatus> {
     let postQuery = Post.find(req.parameters.get("postID"), on: req.db).unwrap(or: Abort(.notFound))
-    let categoryQuery = Category.find(req.parameters.get("postID"), on: req.db).unwrap(or: Abort(.notFound))
-    return postQuery.and(categoryQuery).flatMap { post, category in
-        post.$categories.attach(category, on: req.db).transform(to: .created)
+    let commentQuery = Comment.find(req.parameters.get("postID"), on: req.db).unwrap(or: Abort(.notFound))
+    return postQuery.and(commentQuery).flatMap { post, comment in
+        post.$comments.attach(comment, on: req.db).transform(to: .created)
     }
   }
 
-  func getCategoriesHandler(_ req: Request) -> EventLoopFuture<[Category]> {
+  func getCommentsHandler(_ req: Request) -> EventLoopFuture<[Comment]> {
     Post.find(req.parameters.get("postID"), on: req.db)
     .unwrap(or: Abort(.notFound))
     .flatMap { post in
-        post.$categories.query(on: req.db).all()
+        post.$comments.query(on: req.db).all()
     }
   }
 
-  func removeCategoriesHandler(_ req: Request) -> EventLoopFuture<HTTPStatus> {
+  func removeCommentsHandler(_ req: Request) -> EventLoopFuture<HTTPStatus> {
     let postQuery = Post.find(req.parameters.get("postID"), on: req.db).unwrap(or: Abort(.notFound))
-    let categoryQuery = Category.find(req.parameters.get("postID"), on: req.db).unwrap(or: Abort(.notFound))
-    return postQuery.and(categoryQuery).flatMap { post, category in
-        post.$categories.detach(category, on: req.db).transform(to: .noContent)
+    let commentQuery = Comment.find(req.parameters.get("postID"), on: req.db).unwrap(or: Abort(.notFound))
+    return postQuery.and(commentQuery).flatMap { post, comment in
+        post.$comments.detach(comment, on: req.db).transform(to: .noContent)
     }
   }
 }

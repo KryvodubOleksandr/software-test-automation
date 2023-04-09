@@ -51,13 +51,13 @@ extension Post {
   }
 }
 
-extension App.Category {
+extension App.Comment {
   static func create(
     name: String = "Random",
     on database: Database
-  ) throws -> App.Category {
-    let category = Category(name: name)
-    try category.save(on: database).wait()
-    return category
+  ) throws -> App.Comment {
+    let comment = Comment(name: name)
+    try comment.save(on: database).wait()
+    return comment
   }
 }

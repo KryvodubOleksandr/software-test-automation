@@ -1,6 +1,6 @@
 #extend("base"):
   #export("content"):
-    <h1>#(category.name)</h1>
+    <h1>#(comment.name)</h1>
     
     #extend("postsTable")
   #endexport

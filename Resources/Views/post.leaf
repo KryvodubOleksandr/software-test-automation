@@ -5,13 +5,13 @@
 
     <p>Created by <a href="/users/#(user.id)/">#(user.name)</a></p>
 
-    #if(count(categories) > 0):
-      <h3>Categories</h3>
+    #if(count(comments) > 0):
+      <h3>Comments</h3>
       <ul>
-        #for(category in categories):
+        #for(comment in comments):
           <li>
-            <a href="/categories/#(category.id)">
-              #(category.name)
+            <a href="/comments/#(comment.id)">
+              #(comment.name)
             </a>
           </li>
         #endfor

@@ -1,8 +1,8 @@
 import Fluent
 import Foundation
 
-final class PostCategoryPivot: Model {
-  static let schema = "post-category-pivot"
+final class PostCommentPivot: Model {
+  static let schema = "post-comment-pivot"
   
   @ID
   var id: UUID?
@@ -10,14 +10,14 @@ final class PostCategoryPivot: Model {
   @Parent(key: "postID")
   var post: Post
   
-  @Parent(key: "categoryID")
-  var category: Category
+  @Parent(key: "commentID")
+  var comment: Comment
   
   init() {}
   
-  init(id: UUID? = nil, post: Post, category: Category) throws {
+  init(id: UUID? = nil, post: Post, comment: Comment) throws {
     self.id = id
     self.$post.id = try post.requireID()
-    self.$category.id = try category.requireID()
+    self.$comment.id = try comment.requireID()
   }
 }

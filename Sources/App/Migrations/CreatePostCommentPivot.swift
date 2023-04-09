@@ -1,15 +1,15 @@
 import Fluent
 
-struct CreatePostCategoryPivot: Migration {
+struct CreatePostCommentPivot: Migration {
   func prepare(on database: Database) -> EventLoopFuture<Void> {
-    database.schema("post-category-pivot")
+    database.schema("post-comment-pivot")
       .id()
       .field("postID", .uuid, .required, .references("posts", "id", onDelete: .cascade))
-      .field("categoryID", .uuid, .required, .references("categories", "id", onDelete: .cascade))
+      .field("commentID", .uuid, .required, .references("comments", "id", onDelete: .cascade))
       .create()
   }
   
   func revert(on database: Database) -> EventLoopFuture<Void> {
-    database.schema("post-category-pivot").delete()
+    database.schema("post-comment-pivot").delete()
   }
 }

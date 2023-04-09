@@ -12,8 +12,8 @@ func routes(_ app: Application) throws {
   let usersController = UsersController()
   try app.register(collection: usersController)
   
-  let categoriesController = CategoriesController()
-  try app.register(collection: categoriesController)
+  let commentsController = CommentsController()
+  try app.register(collection: commentsController)
 
   let websiteController = WebsiteController()
   try app.register(collection: websiteController)

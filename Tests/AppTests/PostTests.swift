@@ -159,28 +159,28 @@ final class PostTests: XCTestCase {
     })
   }
 
-  func testPostsCategories() throws {
-    let category = try Category.create(on: app.db)
-    let category2 = try Category.create(name: "Funny", on: app.db)
+  func testPostsComments() throws {
+    let comment = try Comment.create(on: app.db)
+    let comment2 = try Comment.create(name: "Funny", on: app.db)
     let post = try Post.create(on: app.db)
     
-    try app.test(.POST, "\(postsURI)\(post.id!)/categories/\(category.id!)", loggedInRequest: true)
-    try app.test(.POST, "\(postsURI)\(post.id!)/categories/\(category2.id!)", loggedInRequest: true)
+    try app.test(.POST, "\(postsURI)\(post.id!)/comments/\(comment.id!)", loggedInRequest: true)
+    try app.test(.POST, "\(postsURI)\(post.id!)/comments/\(comment2.id!)", loggedInRequest: true)
     
-    try app.test(.GET, "\(postsURI)\(post.id!)/categories", afterResponse: { response in
-      let categories = try response.content.decode([App.Category].self)
-      XCTAssertEqual(categories.count, 2)
-      XCTAssertEqual(categories[0].id, category.id)
-      XCTAssertEqual(categories[0].name, category.name)
-      XCTAssertEqual(categories[1].id, category2.id)
-      XCTAssertEqual(categories[1].name, category2.name)
+    try app.test(.GET, "\(postsURI)\(post.id!)/comments", afterResponse: { response in
+      let comments = try response.content.decode([App.Comment].self)
+      XCTAssertEqual(comments.count, 2)
+      XCTAssertEqual(comments[0].id, comment.id)
+      XCTAssertEqual(comments[0].name, comment.name)
+      XCTAssertEqual(comments[1].id, comment2.id)
+      XCTAssertEqual(comments[1].name, comment2.name)
     })
     
-    try app.test(.DELETE, "\(postsURI)\(post.id!)/categories/\(category.id!)", loggedInRequest: true)
+    try app.test(.DELETE, "\(postsURI)\(post.id!)/comments/\(comment.id!)", loggedInRequest: true)
     
-    try app.test(.GET, "\(postsURI)\(post.id!)/categories", afterResponse: { response in
-      let newCategories = try response.content.decode([App.Category].self)
-      XCTAssertEqual(newCategories.count, 1)
+    try app.test(.GET, "\(postsURI)\(post.id!)/comments", afterResponse: { response in
+      let newComments = try response.content.decode([App.Comment].self)
+      XCTAssertEqual(newComments.count, 1)
     })
   }
 }

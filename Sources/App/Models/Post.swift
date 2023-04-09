@@ -16,8 +16,8 @@ final class Post: Model {
   @Parent(key: "userID")
   var user: User
   
-  @Siblings(through: PostCategoryPivot.self, from: \.$post, to: \.$category)
-  var categories: [Category]
+  @Siblings(through: PostCommentPivot.self, from: \.$post, to: \.$comment)
+  var comments: [Comment]
   
   init() {}
   

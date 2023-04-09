@@ -20,13 +20,13 @@
       </div>
 
       <div class="form-group">
-        <label for="categories">Categories</label>
-        <select name="categories[]" class="form-control"
-         id="categories" placeholder="Categories" multiple="multiple">
+        <label for="comments">Comments</label>
+        <select name="comments[]" class="form-control"
+         id="comments" placeholder="Comments" multiple="multiple">
           #if(editing):
-            #for(category in categories):
-              <option value="#(category.name)" selected="selected">
-                #(category.name)
+            #for(comment in comments):
+              <option value="#(comment.name)" selected="selected">
+                #(comment.name)
               </option>
             #endfor
           #endif

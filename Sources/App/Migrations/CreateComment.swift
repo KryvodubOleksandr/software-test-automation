@@ -1,14 +1,14 @@
 import Fluent
 
-struct CreateCategory: Migration {
+struct CreateComment: Migration {
   func prepare(on database: Database) -> EventLoopFuture<Void> {
-    database.schema("categories")
+    database.schema("comments")
       .id()
       .field("name", .string, .required)
       .create()
   }
   
   func revert(on database: Database) -> EventLoopFuture<Void> {
-    database.schema("categories").delete()
+    database.schema("comments").delete()
   }
 }
