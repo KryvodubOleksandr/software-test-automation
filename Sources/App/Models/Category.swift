@@ -38,8 +38,8 @@ final class Category: Model, Content {
   @Field(key: "name")
   var name: String
   
-  @Siblings(through: AcronymCategoryPivot.self, from: \.$category, to: \.$acronym)
-  var acronyms: [Acronym]
+  @Siblings(through: PostCategoryPivot.self, from: \.$category, to: \.$post)
+  var posts: [Post]
   
   init() {}
   
@@ -50,18 +50,18 @@ final class Category: Model, Content {
 }
 
 extension Category {
-  static func addCategory(_ name: String, to acronym: Acronym, on req: Request) -> EventLoopFuture<Void> {
+  static func addCategory(_ name: String, to post: Post, on req: Request) -> EventLoopFuture<Void> {
     Category.query(on: req.db)
       .filter(\.$name == name)
       .first()
       .flatMap { foundCategory in
         if let existingCategory = foundCategory {
-          return acronym.$categories
+          return post.$categories
             .attach(existingCategory, on: req.db)
         } else {
           let category = Category(name: name)
           return category.save(on: req.db).flatMap {
-            acronym.$categories
+              post.$categories
               .attach(category, on: req.db)
           }
         }

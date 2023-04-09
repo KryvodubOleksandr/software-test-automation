@@ -1,6 +1,6 @@
 #extend("base"):
   #export("content"):
-    <h1>Acronyms</h1>
-    #extend("acronymsTable")
+    <h1>Posts</h1>
+    #extend("postsTable")
   #endexport
 #endextend

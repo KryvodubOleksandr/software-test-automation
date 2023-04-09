@@ -1,0 +1,20 @@
+#if(count(posts) > 0):
+    <table class="table table-bordered table-hover">
+    <thead class="thead-light">
+        <tr>
+        <th>Title</th>
+        <th>Long</th>
+        </tr>
+    </thead>
+    <tbody>
+        #for(post in posts):
+        <tr>
+            <td><a href="/posts/#(post.id)">#(post.title)</a></td>
+            <td>#(post.long)</td>
+        </tr>
+        #endfor
+    </tbody>
+    </table>
+#else:
+    <h2>There aren’t any posts yet!</h2>
+#endif

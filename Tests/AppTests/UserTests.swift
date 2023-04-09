@@ -91,21 +91,21 @@ final class UserTests: XCTestCase {
     })
   }
   
-  func testGettingAUsersAcronymsFromTheAPI() throws {
+  func testGettingAUsersPostsFromTheAPI() throws {
     let user = try User.create(on: app.db)
 
-    let acronymShort = "OMG"
-    let acronymLong = "Oh My God"
+    let postTitle = "OMG"
+    let postLong = "Oh My God"
     
-    let acronym1 = try Acronym.create(short: acronymShort, long: acronymLong, user: user, on: app.db)
-    _ = try Acronym.create(short: "LOL", long: "Laugh Out Loud", user: user, on: app.db)
+    let post1 = try Post.create(title: postTitle, long: postLong, user: user, on: app.db)
+    _ = try Post.create(title: "LOL", long: "Laugh Out Loud", user: user, on: app.db)
 
-    try app.test(.GET, "\(usersURI)\(user.id!)/acronyms", afterResponse: { response in
-      let acronyms = try response.content.decode([Acronym].self)
-      XCTAssertEqual(acronyms.count, 2)
-      XCTAssertEqual(acronyms[0].id, acronym1.id)
-      XCTAssertEqual(acronyms[0].short, acronymShort)
-      XCTAssertEqual(acronyms[0].long, acronymLong)
+    try app.test(.GET, "\(usersURI)\(user.id!)/posts", afterResponse: { response in
+      let posts = try response.content.decode([Post].self)
+      XCTAssertEqual(posts.count, 2)
+      XCTAssertEqual(posts[0].id, post1.id)
+      XCTAssertEqual(posts[0].title, postTitle)
+      XCTAssertEqual(posts[0].long, postLong)
     })
   }
 }

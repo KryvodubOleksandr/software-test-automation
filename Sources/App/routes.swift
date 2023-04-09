@@ -34,8 +34,8 @@ func routes(_ app: Application) throws {
     return "Hello, world!"
   }
   
-  let acronymsController = AcronymsController()
-  try app.register(collection: acronymsController)
+  let postsController = PostsController()
+  try app.register(collection: postsController)
   
   let usersController = UsersController()
   try app.register(collection: usersController)

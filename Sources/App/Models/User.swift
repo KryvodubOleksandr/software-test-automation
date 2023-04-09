@@ -45,7 +45,7 @@ final class User: Model, Content {
   var password: String
   
   @Children(for: \.$user)
-  var acronyms: [Acronym]
+  var posts: [Post]
 
   @OptionalField(key: "siwaIdentifier")
   var siwaIdentifier: String?

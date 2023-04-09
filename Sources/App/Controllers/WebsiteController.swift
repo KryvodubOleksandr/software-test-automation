@@ -1,31 +1,3 @@
-/// Copyright (c) 2021 Razeware LLC
-///
-/// Permission is hereby granted, free of charge, to any person obtaining a copy
-/// of this software and associated documentation files (the "Software"), to deal
-/// in the Software without restriction, including without limitation the rights
-/// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-/// copies of the Software, and to permit persons to whom the Software is
-/// furnished to do so, subject to the following conditions:
-///
-/// The above copyright notice and this permission notice shall be included in
-/// all copies or substantial portions of the Software.
-///
-/// Notwithstanding the foregoing, you may not use, copy, modify, merge, publish,
-/// distribute, sublicense, create a derivative work, and/or sell copies of the
-/// Software in any work that is designed, intended, or marketed for pedagogical or
-/// instructional purposes related to programming, coding, application development,
-/// or information technology.  Permission for such use, copying, modification,
-/// merger, publication, distribution, sublicensing, creation of derivative works,
-/// or sale is expressly withheld.
-///
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-/// THE SOFTWARE.
-
 import Vapor
 import Fluent
 
@@ -40,46 +12,46 @@ struct WebsiteController: RouteCollection {
     authSessionsRoutes.post("register", use: registerPostHandler)
     
     authSessionsRoutes.get(use: indexHandler)
-    authSessionsRoutes.get("acronyms", ":acronymID", use: acronymHandler)
+    authSessionsRoutes.get("posts", ":postID", use: postHandler)
     authSessionsRoutes.get("users", ":userID", use: userHandler)
     authSessionsRoutes.get("categories", ":categoryID", use: categoryHandler)
     
     let protectedRoutes = authSessionsRoutes.grouped(User.redirectMiddleware(path: "/login"))
-    protectedRoutes.get("acronyms", "create", use: createAcronymHandler)
-    protectedRoutes.post("acronyms", "create", use: createAcronymPostHandler)
-    protectedRoutes.get("acronyms", ":acronymID", "edit", use: editAcronymHandler)
-    protectedRoutes.post("acronyms", ":acronymID", "edit", use: editAcronymPostHandler)
-    protectedRoutes.post("acronyms", ":acronymID", "delete", use: deleteAcronymHandler)
+    protectedRoutes.get("posts", "create", use: renderCreatePostHandler)
+    protectedRoutes.post("posts", "create", use: createPostHandler)
+    protectedRoutes.get("posts", ":postID", "edit", use: renderEditPostHandler)
+    protectedRoutes.post("posts", ":postID", "edit", use: editPostHandler)
+    protectedRoutes.post("posts", ":postID", "delete", use: deletePostHandler)
   }
   
   func indexHandler(_ req: Request) -> EventLoopFuture<View> {
-    Acronym.query(on: req.db).all().flatMap { acronyms in
+    Post.query(on: req.db).all().flatMap { posts in
       let userLoggedIn = req.auth.has(User.self)
       let showCookieMessage = req.cookies["cookies-accepted"] == nil
-      let context = IndexContext(title: "Home page", acronyms: acronyms, userLoggedIn: userLoggedIn, showCookieMessage: showCookieMessage)
+      let context = IndexContext(title: "Home page", posts: posts, userLoggedIn: userLoggedIn, showCookieMessage: showCookieMessage)
       return req.view.render("index", context)
     }
   }
   
-  func acronymHandler(_ req: Request) -> EventLoopFuture<View> {
-    Acronym.find(req.parameters.get("acronymID"), on: req.db).unwrap(or: Abort(.notFound)).flatMap { acronym in
-      let userFuture = acronym.$user.get(on: req.db)
-      let categoriesFuture = acronym.$categories.query(on: req.db).all()
+  func postHandler(_ req: Request) -> EventLoopFuture<View> {
+    Post.find(req.parameters.get("postID"), on: req.db).unwrap(or: Abort(.notFound)).flatMap { post in
+      let userFuture = post.$user.get(on: req.db)
+      let categoriesFuture = post.$categories.query(on: req.db).all()
       return userFuture.and(categoriesFuture).flatMap { user, categories in
-        let context = AcronymContext(
-          title: acronym.short,
-          acronym: acronym,
+        let context = PostContext(
+          title: post.title,
+          post: post,
           user: user,
           categories: categories)
-        return req.view.render("acronym", context)
+        return req.view.render("post", context)
       }
     }
   }
   
   func userHandler(_ req: Request) -> EventLoopFuture<View> {
     User.find(req.parameters.get("userID"), on: req.db).unwrap(or: Abort(.notFound)).flatMap { user in
-      user.$acronyms.get(on: req.db).flatMap { acronyms in
-        let context = UserContext(title: user.name, user: user, acronyms: acronyms)
+      user.$posts.get(on: req.db).flatMap { posts in
+        let context = UserContext(title: user.name, user: user, posts: posts)
         return req.view.render("user", context)
       }
     }
@@ -87,22 +59,22 @@ struct WebsiteController: RouteCollection {
   
   func categoryHandler(_ req: Request) -> EventLoopFuture<View> {
     Category.find(req.parameters.get("categoryID"), on: req.db).unwrap(or: Abort(.notFound)).flatMap { category in
-      category.$acronyms.get(on: req.db).flatMap { acronyms in
-        let context = CategoryContext(title: category.name, category: category, acronyms: acronyms)
+      category.$posts.get(on: req.db).flatMap { posts in
+        let context = CategoryContext(title: category.name, category: category, posts: posts)
         return req.view.render("category", context)
       }
     }
   }
   
-  func createAcronymHandler(_ req: Request) -> EventLoopFuture<View> {
+  func renderCreatePostHandler(_ req: Request) -> EventLoopFuture<View> {
     let token = [UInt8].random(count: 16).base64
-    let context = CreateAcronymContext(csrfToken: token)
+    let context = CreatePostContext(csrfToken: token)
     req.session.data["CSRF_TOKEN"] = token
-    return req.view.render("createAcronym", context)
+    return req.view.render("createPost", context)
   }
   
-  func createAcronymPostHandler(_ req: Request) throws -> EventLoopFuture<Response> {
-    let data = try req.content.decode(CreateAcronymFormData.self)
+  func createPostHandler(_ req: Request) throws -> EventLoopFuture<Response> {
+    let data = try req.content.decode(CreatePostFormData.self)
     let user = try req.auth.require(User.self)
     
     let expectedToken = req.session.data["CSRF_TOKEN"]
@@ -114,42 +86,42 @@ struct WebsiteController: RouteCollection {
       throw Abort(.badRequest)
     }
     
-    let acronym = try Acronym(short: data.short, long: data.long, userID: user.requireID())
-    return acronym.save(on: req.db).flatMap {
-      guard let id = acronym.id else {
+    let post = try Post(title: data.title, long: data.long, userID: user.requireID())
+    return post.save(on: req.db).flatMap {
+      guard let id = post.id else {
         return req.eventLoop.future(error: Abort(.internalServerError))
       }
       var categorySaves: [EventLoopFuture<Void>] = []
       for category in data.categories ?? [] {
-        categorySaves.append(Category.addCategory(category, to: acronym, on: req))
+        categorySaves.append(Category.addCategory(category, to: post, on: req))
       }
-      let redirect = req.redirect(to: "/acronyms/\(id)")
+      let redirect = req.redirect(to: "/posts/\(id)")
       return categorySaves.flatten(on: req.eventLoop).transform(to: redirect)
     }
   }
   
-  func editAcronymHandler(_ req: Request) -> EventLoopFuture<View> {
-    return Acronym.find(req.parameters.get("acronymID"), on: req.db).unwrap(or: Abort(.notFound)).flatMap { acronym in
-      acronym.$categories.get(on: req.db).flatMap { categories in
-        let context = EditAcronymContext(acronym: acronym, categories: categories)
-        return req.view.render("createAcronym", context)
+  func renderEditPostHandler(_ req: Request) -> EventLoopFuture<View> {
+    return Post.find(req.parameters.get("postID"), on: req.db).unwrap(or: Abort(.notFound)).flatMap { post in
+      post.$categories.get(on: req.db).flatMap { categories in
+        let context = EditPostContext(post: post, categories: categories)
+        return req.view.render("createPost", context)
       }
     }
   }
   
-  func editAcronymPostHandler(_ req: Request) throws -> EventLoopFuture<Response> {
+  func editPostHandler(_ req: Request) throws -> EventLoopFuture<Response> {
     let user = try req.auth.require(User.self)
     let userID = try user.requireID()
-    let updateData = try req.content.decode(CreateAcronymFormData.self)
-    return Acronym.find(req.parameters.get("acronymID"), on: req.db).unwrap(or: Abort(.notFound)).flatMap { acronym in
-      acronym.short = updateData.short
-      acronym.long = updateData.long
-      acronym.$user.id = userID
-      guard let id = acronym.id else {
+    let updateData = try req.content.decode(CreatePostFormData.self)
+    return Post.find(req.parameters.get("postID"), on: req.db).unwrap(or: Abort(.notFound)).flatMap { post in
+      post.title = updateData.title
+      post.long = updateData.long
+      post.$user.id = userID
+      guard let id = post.id else {
         return req.eventLoop.future(error: Abort(.internalServerError))
       }
-      return acronym.save(on: req.db).flatMap {
-        acronym.$categories.get(on: req.db)
+      return post.save(on: req.db).flatMap {
+        post.$categories.get(on: req.db)
       }.flatMap { existingCategories in
         let existingStringArray = existingCategories.map {
           $0.name
@@ -163,7 +135,7 @@ struct WebsiteController: RouteCollection {
         
         var categoryResults: [EventLoopFuture<Void>] = []
         for newCategory in categoriesToAdd {
-          categoryResults.append(Category.addCategory(newCategory, to: acronym, on: req))
+          categoryResults.append(Category.addCategory(newCategory, to: post, on: req))
         }
         
         for categoryNameToRemove in categoriesToRemove {
@@ -172,19 +144,19 @@ struct WebsiteController: RouteCollection {
           }
           if let category = categoryToRemove {
             categoryResults.append(
-              acronym.$categories.detach(category, on: req.db))
+              post.$categories.detach(category, on: req.db))
           }
         }
         
-        let redirect = req.redirect(to: "/acronyms/\(id)")
+        let redirect = req.redirect(to: "/posts/\(id)")
         return categoryResults.flatten(on: req.eventLoop).transform(to: redirect)
       }
     }
   }
   
-  func deleteAcronymHandler(_ req: Request) -> EventLoopFuture<Response> {
-    Acronym.find(req.parameters.get("acronymID"), on: req.db).unwrap(or: Abort(.notFound)).flatMap { acronym in
-      acronym.delete(on: req.db).transform(to: req.redirect(to: "/"))
+  func deletePostHandler(_ req: Request) -> EventLoopFuture<Response> {
+    Post.find(req.parameters.get("postID"), on: req.db).unwrap(or: Abort(.notFound)).flatMap { post in
+      post.delete(on: req.db).transform(to: req.redirect(to: "/"))
     }
   }
   
@@ -251,14 +223,14 @@ struct WebsiteController: RouteCollection {
 
 struct IndexContext: Encodable {
   let title: String
-  let acronyms: [Acronym]
+  let posts: [Post]
   let userLoggedIn: Bool
   let showCookieMessage: Bool
 }
 
-struct AcronymContext: Encodable {
+struct PostContext: Encodable {
   let title: String
-  let acronym: Acronym
+  let post: Post
   let user: User
   let categories: [Category]
 }
@@ -266,29 +238,29 @@ struct AcronymContext: Encodable {
 struct UserContext: Encodable {
   let title: String
   let user: User
-  let acronyms: [Acronym]
+  let posts: [Post]
 }
 
 struct CategoryContext: Encodable {
   let title: String
   let category: Category
-  let acronyms: [Acronym]
+  let posts: [Post]
 }
 
-struct CreateAcronymContext: Encodable {
-  let title = "Create An Acronym"
+struct CreatePostContext: Encodable {
+  let title = "Create a Post"
   let csrfToken: String
 }
 
-struct EditAcronymContext: Encodable {
-  let title = "Edit Acronym"
-  let acronym: Acronym
+struct EditPostContext: Encodable {
+  let title = "Edit Post"
+  let post: Post
   let editing = true
   let categories: [Category]
 }
 
-struct CreateAcronymFormData: Content {
-  let short: String
+struct CreatePostFormData: Content {
+  let title: String
   let long: String
   let categories: [String]?
   let csrfToken: String?

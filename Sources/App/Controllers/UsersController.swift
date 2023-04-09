@@ -34,7 +34,7 @@ struct UsersController: RouteCollection {
   func boot(routes: RoutesBuilder) throws {
     let usersRoute = routes.grouped("api", "users")
     usersRoute.get(":userID", use: getHandler)
-    usersRoute.get(":userID", "acronyms", use: getAcronymsHandler)
+    usersRoute.get(":userID", "posts", use: getPostsHandler)
     let basicAuthMiddleware = User.authenticator()
     let basicAuthGroup = usersRoute.grouped(basicAuthMiddleware)
     basicAuthGroup.post("login", use: loginHandler)
@@ -55,9 +55,9 @@ struct UsersController: RouteCollection {
     User.find(req.parameters.get("userID"), on: req.db).unwrap(or: Abort(.notFound)).convertToPublic()
   }
   
-  func getAcronymsHandler(_ req: Request) -> EventLoopFuture<[Acronym]> {
+  func getPostsHandler(_ req: Request) -> EventLoopFuture<[Post]> {
     User.find(req.parameters.get("userID"), on: req.db).unwrap(or: Abort(.notFound)).flatMap { user in
-      user.$acronyms.get(on: req.db)
+      user.$posts.get(on: req.db)
     }
   }
   

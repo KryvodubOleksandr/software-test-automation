@@ -8,15 +8,15 @@
       #endif
       
       <div class="form-group">
-        <label for="short">Acronym</label>
-        <input type="text" name="short" class="form-control"
-        id="short" #if(editing): value="#(acronym.short)" #endif/>
+        <label for="title">Post</label>
+        <input type="text" name="title" class="form-control"
+        id="title" #if(editing): value="#(post.title)" #endif/>
       </div>
 
       <div class="form-group">
         <label for="long">Meaning</label>
         <input type="text" name="long" class="form-control"
-        id="long" #if(editing): value="#(acronym.long)" #endif/>
+        id="long" #if(editing): value="#(post.long)" #endif/>
       </div>
 
       <div class="form-group">

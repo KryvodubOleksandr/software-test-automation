@@ -59,9 +59,9 @@ public func configure(_ app: Application) throws {
   ), as: .psql)
   
   app.migrations.add(CreateUser())
-  app.migrations.add(CreateAcronym())
+  app.migrations.add(CreatePost())
   app.migrations.add(CreateCategory())
-  app.migrations.add(CreateAcronymCategoryPivot())
+  app.migrations.add(CreatePostCategoryPivot())
   app.migrations.add(CreateToken())
   app.migrations.add(CreateAdminUser())
 

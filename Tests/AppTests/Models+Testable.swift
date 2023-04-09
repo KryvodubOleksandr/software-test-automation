@@ -57,25 +57,25 @@ extension User {
   }
 }
 
-extension Acronym {
+extension Post {
   static func create(
-    short: String = "TIL",
+    title: String = "TIL",
     long: String = "Today I Learned",
     user: User? = nil,
     on database: Database
-  ) throws -> Acronym {
-    var acronymsUser = user
+  ) throws -> Post {
+    var postsUser = user
     
-    if acronymsUser == nil {
-      acronymsUser = try User.create(on: database)
+    if postsUser == nil {
+      postsUser = try User.create(on: database)
     }
     
-    let acronym = Acronym(
-      short: short,
+    let post = Post(
+        title: title,
       long: long,
-      userID: acronymsUser!.id!)
-    try acronym.save(on: database).wait()
-    return acronym
+      userID: postsUser!.id!)
+    try post.save(on: database).wait()
+    return post
   }
 }
 

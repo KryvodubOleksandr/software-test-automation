@@ -13,7 +13,7 @@ $.ajax({
       dataToReturn.push(newTag);
     }
     $("#categories").select2({
-      placeholder: "Select Categories for the Acronym",
+      placeholder: "Select Categories for the Post",
       tags: true,
       tokenSeparators: [','],
       data: dataToReturn
