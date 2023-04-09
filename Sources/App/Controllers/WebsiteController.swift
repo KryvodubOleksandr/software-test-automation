@@ -168,7 +168,6 @@ struct WebsiteController: RouteCollection {
       context = LoginContext()
     }
     return req.view.render("login", context).encodeResponse(for: req).map { response in
-      let expiryDate = Date().addingTimeInterval(300)
       return response
     }
   }
@@ -288,6 +287,7 @@ struct RegisterData: Content {
   let name: String
   let username: String
   let password: String
+  let confirmPassword: String
 }
 
 extension RegisterData: Validatable {
