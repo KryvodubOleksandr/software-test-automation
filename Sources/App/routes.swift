@@ -46,6 +46,6 @@ func routes(_ app: Application) throws {
   let websiteController = WebsiteController()
   try app.register(collection: websiteController)
 
-  let imperialController = ImperialController()
-  try app.register(collection: imperialController)
+//  let imperialController = ImperialController()
+//  try app.register(collection: imperialController)
 }
