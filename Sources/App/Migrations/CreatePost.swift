@@ -5,7 +5,7 @@ struct CreatePost: Migration {
     database.schema("posts")
       .id()
       .field("title", .string, .required)
-      .field("long", .string, .required)
+      .field("body", .string, .required)
       .field("userID", .uuid, .required, .references("users", "id"))
       .create()
   }

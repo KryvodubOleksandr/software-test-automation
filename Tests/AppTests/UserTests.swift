@@ -67,17 +67,17 @@ final class UserTests: XCTestCase {
     let user = try User.create(on: app.db)
 
     let postTitle = "OMG"
-    let postDescription = "Oh My God"
+    let postBody = "Oh My God"
     
-    let post1 = try Post.create(title: postTitle, long: postDescription, user: user, on: app.db)
-    _ = try Post.create(title: "LOL", long: "Laugh Out Loud", user: user, on: app.db)
+    let post1 = try Post.create(title: postTitle, body: postBody, user: user, on: app.db)
+    _ = try Post.create(title: "LOL", body: "Laugh Out Loud", user: user, on: app.db)
 
     try app.test(.GET, "\(usersURI)\(user.id!)/posts", afterResponse: { response in
       let posts = try response.content.decode([Post].self)
       XCTAssertEqual(posts.count, 2)
       XCTAssertEqual(posts[0].id, post1.id)
       XCTAssertEqual(posts[0].title, postTitle)
-      XCTAssertEqual(posts[0].long, postDescription)
+      XCTAssertEqual(posts[0].body, postBody)
     })
   }
 }

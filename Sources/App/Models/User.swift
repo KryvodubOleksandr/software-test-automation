@@ -18,17 +18,13 @@ final class User: Model, Content {
   
   @Children(for: \.$user)
   var posts: [Post]
-
-  @OptionalField(key: "siwaIdentifier")
-  var siwaIdentifier: String?
   
   init() {}
   
-  init(id: UUID? = nil, name: String, username: String, password: String, siwaIdentifier: String? = nil) {
+  init(id: UUID? = nil, name: String, username: String, password: String) {
     self.name = name
     self.username = username
     self.password = password
-    self.siwaIdentifier = siwaIdentifier
   }
 
   final class Public: Content {

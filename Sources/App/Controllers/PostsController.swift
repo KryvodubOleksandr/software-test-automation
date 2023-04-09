@@ -29,7 +29,7 @@ struct PostsController: RouteCollection {
   func createHandler(_ req: Request) throws -> EventLoopFuture<Post> {
     let data = try req.content.decode(CreatePostData.self)
     let user = try req.auth.require(User.self)
-    let post = try Post(title: data.title, long: data.long, userID: user.requireID())
+    let post = try Post(title: data.title, body: data.body, userID: user.requireID())
     return post.save(on: req.db).map { post }
   }
 
@@ -45,7 +45,7 @@ struct PostsController: RouteCollection {
     return Post.find(req.parameters.get("postID"), on: req.db)
       .unwrap(or: Abort(.notFound)).flatMap { post in
         post.title = updateData.title
-        post.long = updateData.long
+        post.body = updateData.body
         post.$user.id = userID
         return post.save(on: req.db).map {
           post
@@ -70,7 +70,7 @@ struct PostsController: RouteCollection {
     }
     return Post.query(on: req.db).group(.or) { or in
       or.filter(\.$title == searchTerm)
-      or.filter(\.$long == searchTerm)
+      or.filter(\.$body == searchTerm)
     }.all()
   }
 
@@ -119,5 +119,5 @@ struct PostsController: RouteCollection {
 
 struct CreatePostData: Content {
   let title: String
-  let long: String
+  let body: String
 }

@@ -57,8 +57,8 @@ final class CategoryTests: XCTestCase {
 
   func testGettingACategoriesPostsFromTheAPI() throws {
     let postTitle = "OMG"
-    let postDescription = "Oh My God"
-    let post = try Post.create(title: postTitle, long: postDescription, on: app.db)
+    let postBody = "Oh My God"
+    let post = try Post.create(title: postTitle, body: postBody, on: app.db)
     let post2 = try Post.create(on: app.db)
 
     let category = try Category.create(name: categoryName, on: app.db)
@@ -71,7 +71,7 @@ final class CategoryTests: XCTestCase {
       XCTAssertEqual(posts.count, 2)
       XCTAssertEqual(posts[0].id, post.id)
       XCTAssertEqual(posts[0].title, postTitle)
-      XCTAssertEqual(posts[0].long, postDescription)
+      XCTAssertEqual(posts[0].body, postBody)
     })
   }
 }

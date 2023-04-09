@@ -3,14 +3,14 @@
     <thead class="thead-light">
         <tr>
         <th>Title</th>
-        <th>Long</th>
+        <th>Body</th>
         </tr>
     </thead>
     <tbody>
         #for(post in posts):
         <tr>
             <td><a href="/posts/#(post.id)">#(post.title)</a></td>
-            <td>#(post.long)</td>
+            <td>#(post.body)</td>
         </tr>
         #endfor
     </tbody>

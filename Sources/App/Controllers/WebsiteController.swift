@@ -86,7 +86,7 @@ struct WebsiteController: RouteCollection {
       throw Abort(.badRequest)
     }
     
-    let post = try Post(title: data.title, long: data.long, userID: user.requireID())
+    let post = try Post(title: data.title, body: data.body, userID: user.requireID())
     return post.save(on: req.db).flatMap {
       guard let id = post.id else {
         return req.eventLoop.future(error: Abort(.internalServerError))
@@ -115,7 +115,7 @@ struct WebsiteController: RouteCollection {
     let updateData = try req.content.decode(CreatePostFormData.self)
     return Post.find(req.parameters.get("postID"), on: req.db).unwrap(or: Abort(.notFound)).flatMap { post in
       post.title = updateData.title
-      post.long = updateData.long
+      post.body = updateData.body
       post.$user.id = userID
       guard let id = post.id else {
         return req.eventLoop.future(error: Abort(.internalServerError))
@@ -261,7 +261,7 @@ struct EditPostContext: Encodable {
 
 struct CreatePostFormData: Content {
   let title: String
-  let long: String
+  let body: String
   let categories: [String]?
   let csrfToken: String?
 }
@@ -288,7 +288,6 @@ struct RegisterData: Content {
   let name: String
   let username: String
   let password: String
-  let confirmPassword: String
 }
 
 extension RegisterData: Validatable {

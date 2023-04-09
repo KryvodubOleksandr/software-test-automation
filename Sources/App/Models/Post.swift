@@ -10,8 +10,8 @@ final class Post: Model {
   @Field(key: "title")
   var title: String
   
-  @Field(key: "long")
-  var long: String
+  @Field(key: "body")
+  var body: String
   
   @Parent(key: "userID")
   var user: User
@@ -21,10 +21,10 @@ final class Post: Model {
   
   init() {}
   
-  init(id: UUID? = nil, title: String, long: String, userID: User.IDValue) {
+  init(id: UUID? = nil, title: String, body: String, userID: User.IDValue) {
     self.id = id
     self.title = title
-    self.long = long
+    self.body = body
     self.$user.id = userID
   }
 }

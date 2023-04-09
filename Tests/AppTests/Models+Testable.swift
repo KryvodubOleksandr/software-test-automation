@@ -32,7 +32,7 @@ extension User {
 extension Post {
   static func create(
     title: String = "TIL",
-    long: String = "Today I Learned",
+    body: String = "Today I Learned",
     user: User? = nil,
     on database: Database
   ) throws -> Post {
@@ -43,8 +43,8 @@ extension Post {
     }
     
     let post = Post(
-        title: title,
-      long: long,
+      title: title,
+      body: body,
       userID: postsUser!.id!)
     try post.save(on: database).wait()
     return post

@@ -4,7 +4,7 @@ import XCTVapor
 final class PostTests: XCTestCase {
   let postsURI = "/api/posts/"
   let postTitle = "OMG"
-  let postDescription = "Oh My God"
+  let postBody = "Oh My God"
   var app: Application!
 
   override func setUp() {
@@ -16,28 +16,28 @@ final class PostTests: XCTestCase {
   }
 
   func testPostsCanBeRetrievedFromAPI() throws {
-    let post1 = try Post.create(title: postTitle, long: postDescription, on: app.db)
+    let post1 = try Post.create(title: postTitle, body: postBody, on: app.db)
     _ = try Post.create(on: app.db)
 
     try app.test(.GET, postsURI, afterResponse: { response in
       let posts = try response.content.decode([Post].self)
       XCTAssertEqual(posts.count, 2)
       XCTAssertEqual(posts[0].title, postTitle)
-      XCTAssertEqual(posts[0].long, postDescription)
+      XCTAssertEqual(posts[0].body, postBody)
       XCTAssertEqual(posts[0].id, post1.id)
     })
   }
 
   func testPostCanBeSavedWithAPI() throws {
     let user = try User.create(on: app.db)
-    let createPostData = CreatePostData(title: postTitle, long: postDescription)
+    let createPostData = CreatePostData(title: postTitle, body: postBody)
     
     try app.test(.POST, postsURI, loggedInUser: user, beforeRequest: { request in
       try request.content.encode(createPostData)
     }, afterResponse: { response in
       let receivedPost = try response.content.decode(Post.self)
       XCTAssertEqual(receivedPost.title, postTitle)
-      XCTAssertEqual(receivedPost.long, postDescription)
+      XCTAssertEqual(receivedPost.body, postBody)
       XCTAssertNotNil(receivedPost.id)
       XCTAssertEqual(receivedPost.$user.id, user.id)
 
@@ -45,7 +45,7 @@ final class PostTests: XCTestCase {
         let posts = try allPostsResponse.content.decode([Post].self)
         XCTAssertEqual(posts.count, 1)
         XCTAssertEqual(posts[0].title, postTitle)
-        XCTAssertEqual(posts[0].long, postDescription)
+        XCTAssertEqual(posts[0].body, postBody)
         XCTAssertEqual(posts[0].id, receivedPost.id)
         XCTAssertEqual(posts[0].$user.id, user.id)
       })
@@ -53,21 +53,21 @@ final class PostTests: XCTestCase {
   }
 
   func testGettingASinglePostFromTheAPI() throws {
-    let post = try Post.create(title: postTitle, long: postDescription, on: app.db)
+    let post = try Post.create(title: postTitle, body: postBody, on: app.db)
     
     try app.test(.GET, "\(postsURI)\(post.id!)", afterResponse: { response in
       let returnedPost = try response.content.decode(Post.self)
       XCTAssertEqual(returnedPost.title, postTitle)
-      XCTAssertEqual(returnedPost.long, postDescription)
+      XCTAssertEqual(returnedPost.body, postBody)
       XCTAssertEqual(returnedPost.id, post.id)
     })
   }
 
   func testUpdatingAnPost() throws {
-    let post = try Post.create(title: postTitle, long: postDescription, on: app.db)
+    let post = try Post.create(title: postTitle, body: postBody, on: app.db)
     let newUser = try User.create(on: app.db)
-    let newLong = "Oh My Gosh"
-    let updatedPostData = CreatePostData(title: postTitle, long: newLong)
+    let newBody = "Oh My Gosh"
+    let updatedPostData = CreatePostData(title: postTitle, body: newBody)
     
     try app.test(.PUT, "\(postsURI)\(post.id!)", loggedInUser: newUser, beforeRequest: { request in
       try request.content.encode(updatedPostData)
@@ -76,7 +76,7 @@ final class PostTests: XCTestCase {
     try app.test(.GET, "\(postsURI)\(post.id!)", afterResponse: { response in
       let returnedPost = try response.content.decode(Post.self)
       XCTAssertEqual(returnedPost.title, postTitle)
-      XCTAssertEqual(returnedPost.long, newLong)
+      XCTAssertEqual(returnedPost.body, newBody)
       XCTAssertEqual(returnedPost.$user.id, newUser.id)
     })
   }
@@ -98,31 +98,31 @@ final class PostTests: XCTestCase {
   }
 
   func testSearchPostShort() throws {
-    let post = try Post.create(title: postTitle, long: postDescription, on: app.db)
+    let post = try Post.create(title: postTitle, body: postBody, on: app.db)
     
     try app.test(.GET, "\(postsURI)search?term=OMG", afterResponse: { response in
       let posts = try response.content.decode([Post].self)
       XCTAssertEqual(posts.count, 1)
       XCTAssertEqual(posts[0].id, post.id)
       XCTAssertEqual(posts[0].title, postTitle)
-      XCTAssertEqual(posts[0].long, postDescription)
+      XCTAssertEqual(posts[0].body, postBody)
     })
   }
 
-  func testSearchPostLong() throws {
-    let post = try Post.create(title: postTitle, long: postDescription, on: app.db)
+  func testSearchPostBody() throws {
+    let post = try Post.create(title: postTitle, body: postBody, on: app.db)
     
     try app.test(.GET, "\(postsURI)search?term=Oh+My+God", afterResponse: { response in
       let posts = try response.content.decode([Post].self)
       XCTAssertEqual(posts.count, 1)
       XCTAssertEqual(posts[0].id, post.id)
       XCTAssertEqual(posts[0].title, postTitle)
-      XCTAssertEqual(posts[0].long, postDescription)
+      XCTAssertEqual(posts[0].body, postBody)
     })
   }
 
   func testGetFirstPost() throws {
-    let post = try Post.create(title: postTitle, long: postDescription, on: app.db)
+    let post = try Post.create(title: postTitle, body: postBody, on: app.db)
     _ = try Post.create(on: app.db)
     _ = try Post.create(on: app.db)
     
@@ -130,15 +130,15 @@ final class PostTests: XCTestCase {
       let firstPost = try response.content.decode(Post.self)
       XCTAssertEqual(firstPost.id, post.id)
       XCTAssertEqual(firstPost.title, postTitle)
-      XCTAssertEqual(firstPost.long, postDescription)
+      XCTAssertEqual(firstPost.body, postBody)
     })
   }
 
   func testSortingPosts() throws {
     let title2 = "LOL"
-    let long2 = "Laugh Out Loud"
-    let post1 = try Post.create(title: postTitle, long: postDescription, on: app.db)
-    let post2 = try Post.create(title: title2, long: long2, on: app.db)
+    let body2 = "Laugh Out Loud"
+    let post1 = try Post.create(title: postTitle, body: postBody, on: app.db)
+    let post2 = try Post.create(title: title2, body: body2, on: app.db)
     
     try app.test(.GET, "\(postsURI)sorted", afterResponse: { response in
       let sortedPosts = try response.content.decode([Post].self)

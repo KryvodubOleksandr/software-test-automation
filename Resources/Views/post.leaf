@@ -1,7 +1,7 @@
 #extend("base"):
   #export("content"):
     <h1>#(post.title)</h1>
-    <h2>#(post.long)</h2>
+    <h2>#(post.body)</h2>
 
     <p>Created by <a href="/users/#(user.id)/">#(user.name)</a></p>
 
