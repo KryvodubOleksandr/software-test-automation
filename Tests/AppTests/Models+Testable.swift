@@ -5,7 +5,6 @@ import Vapor
 extension User {
   // 1
   static func create(
-    name: String = "Luke",
     username: String? = nil,
     on database: Database
   ) throws -> User {
@@ -21,7 +20,6 @@ extension User {
     // 4
     let password = try Bcrypt.hash("password")
     let user = User(
-      name: name,
       username: createUsername,
       password: password)
     try user.save(on: database).wait()

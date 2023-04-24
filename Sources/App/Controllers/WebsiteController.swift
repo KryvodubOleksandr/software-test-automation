@@ -51,7 +51,7 @@ struct WebsiteController: RouteCollection {
   func userHandler(_ req: Request) -> EventLoopFuture<View> {
     User.find(req.parameters.get("userID"), on: req.db).unwrap(or: Abort(.notFound)).flatMap { user in
       user.$posts.get(on: req.db).flatMap { posts in
-        let context = UserContext(title: user.name, user: user, posts: posts)
+        let context = UserContext(title: user.username, user: user, posts: posts)
         return req.view.render("user", context)
       }
     }
@@ -95,7 +95,7 @@ struct WebsiteController: RouteCollection {
       for comment in data.comments ?? [] {
         commentSaves.append(Comment.addComment(comment, to: post, on: req))
       }
-      let redirect = req.redirect(to: "/posts/\(id)")
+      let redirect = req.redirect(to: "/")
       return commentSaves.flatten(on: req.eventLoop).transform(to: redirect)
     }
   }
@@ -185,7 +185,7 @@ struct WebsiteController: RouteCollection {
   
   func logoutHandler(_ req: Request) -> Response {
     req.auth.logout(User.self)
-    return req.redirect(to: "/")
+    return req.redirect(to: "/login")
   }
   
   func registerHandler(_ req: Request) throws -> EventLoopFuture<Response> {
@@ -210,9 +210,9 @@ struct WebsiteController: RouteCollection {
     let data = try req.content.decode(RegisterData.self)
     let password = try Bcrypt.hash(data.password)
     let user = User(
-      name: data.name,
       username: data.username,
-      password: password)
+      password: password
+    )
     return user.save(on: req.db).map {
       req.auth.login(user)
       return req.redirect(to: "/")
@@ -284,7 +284,6 @@ struct RegisterContext: Encodable {
 }
 
 struct RegisterData: Content {
-  let name: String
   let username: String
   let password: String
   let confirmPassword: String
@@ -292,7 +291,6 @@ struct RegisterData: Content {
 
 extension RegisterData: Validatable {
   public static func validations(_ validations: inout Validations) {
-    validations.add("name", as: String.self, is: .ascii)
     validations.add("username", as: String.self, is: .alphanumeric && .count(3...))
     validations.add("password", as: String.self, is: .count(8...))
     validations.add("zipCode", as: String.self, is: .zipCode, required: false)

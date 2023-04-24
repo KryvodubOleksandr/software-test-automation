@@ -7,8 +7,7 @@
     <!-- 3 -->
     #if(loginError):
       <div class="alert alert-danger" role="alert">
-        User authentication error. Either your username or
-        password was invalid.
+        Invalid username/password, Try again!
       </div>
     #endif
 

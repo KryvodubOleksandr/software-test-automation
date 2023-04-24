@@ -154,7 +154,6 @@ final class PostTests: XCTestCase {
     try app.test(.GET, "\(postsURI)\(post.id!)/user", afterResponse: { response in
       let postsUser = try response.content.decode(User.Public.self)
       XCTAssertEqual(postsUser.id, user.id)
-      XCTAssertEqual(postsUser.name, user.name)
       XCTAssertEqual(postsUser.username, user.username)
     })
   }

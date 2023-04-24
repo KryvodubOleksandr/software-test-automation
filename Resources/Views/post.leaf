@@ -3,7 +3,7 @@
     <h1>#(post.title)</h1>
     <h2>#(post.body)</h2>
 
-    <p>Created by <a href="/users/#(user.id)/">#(user.name)</a></p>
+    <p>Created by <a href="/users/#(user.id)/">#(user.username)</a></p>
 
     #if(count(comments) > 0):
       <h3>Comments</h3>
