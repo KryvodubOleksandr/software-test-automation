@@ -3,6 +3,7 @@ import XCTVapor
 
 final class PostTests: XCTestCase {
   let postsURI = "/api/posts/"
+  let postDescription = "OMG"
   let postTitle = "OMG"
   let postBody = "Oh My God"
   var app: Application!
@@ -30,7 +31,7 @@ final class PostTests: XCTestCase {
 
   func testPostCanBeSavedWithAPI() throws {
     let user = try User.create(on: app.db)
-    let createPostData = CreatePostData(title: postTitle, body: postBody)
+      let createPostData = CreatePostData(title: postTitle, description: postDescription, body: postBody)
     
     try app.test(.POST, postsURI, loggedInUser: user, beforeRequest: { request in
       try request.content.encode(createPostData)
@@ -53,7 +54,7 @@ final class PostTests: XCTestCase {
   }
 
   func testGettingASinglePostFromTheAPI() throws {
-    let post = try Post.create(title: postTitle, body: postBody, on: app.db)
+    let post = try Post.create(title: postTitle, description: postDescription, body: postBody, on: app.db)
     
     try app.test(.GET, "\(postsURI)\(post.id!)", afterResponse: { response in
       let returnedPost = try response.content.decode(Post.self)
@@ -67,7 +68,7 @@ final class PostTests: XCTestCase {
     let post = try Post.create(title: postTitle, body: postBody, on: app.db)
     let newUser = try User.create(on: app.db)
     let newBody = "Oh My Gosh"
-    let updatedPostData = CreatePostData(title: postTitle, body: newBody)
+    let updatedPostData = CreatePostData(title: postTitle, description: postDescription, body: newBody)
     
     try app.test(.PUT, "\(postsURI)\(post.id!)", loggedInUser: newUser, beforeRequest: { request in
       try request.content.encode(updatedPostData)

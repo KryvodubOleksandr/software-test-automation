@@ -3,6 +3,7 @@
     <thead class="thead-light">
         <tr>
         <th>Title</th>
+        <th>Description</th>
         <th>Body</th>
         </tr>
     </thead>
@@ -10,6 +11,7 @@
         #for(post in posts):
         <tr>
             <td><a href="/posts/#(post.id)">#(post.title)</a></td>
+            <td>#(post.description)</td>
             <td>#(post.body)</td>
         </tr>
         #endfor

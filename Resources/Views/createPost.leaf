@@ -8,13 +8,19 @@
       #endif
       
       <div class="form-group">
-        <label for="title">Post</label>
+        <label for="title">Title</label>
         <input type="text" name="title" class="form-control"
         id="title" #if(editing): value="#(post.title)" #endif/>
       </div>
 
       <div class="form-group">
-        <label for="body">Meaning</label>
+        <label for="body">Description</label>
+        <input type="text" name="description" class="form-control"
+        id="body" #if(editing): value="#(post.description)" #endif/>
+      </div>
+
+      <div class="form-group">
+        <label for="body">Body</label>
         <input type="text" name="body" class="form-control"
         id="body" #if(editing): value="#(post.body)" #endif/>
       </div>

@@ -86,7 +86,7 @@ struct WebsiteController: RouteCollection {
       throw Abort(.badRequest)
     }
     
-    let post = try Post(title: data.title, body: data.body, userID: user.requireID())
+      let post = try Post(title: data.title, description: data.description, body: data.body, userID: user.requireID())
     return post.save(on: req.db).flatMap {
       guard let id = post.id else {
         return req.eventLoop.future(error: Abort(.internalServerError))
@@ -260,6 +260,7 @@ struct EditPostContext: Encodable {
 
 struct CreatePostFormData: Content {
   let title: String
+  let description: String
   let body: String
   let comments: [String]?
   let csrfToken: String?

@@ -29,8 +29,9 @@ extension User {
 
 extension Post {
   static func create(
-    title: String = "TIL",
-    body: String = "Today I Learned",
+    title: String = "title",
+    description: String = "description",
+    body: String = "body",
     user: User? = nil,
     on database: Database
   ) throws -> Post {
@@ -42,6 +43,7 @@ extension Post {
     
     let post = Post(
       title: title,
+      description: description,
       body: body,
       userID: postsUser!.id!)
     try post.save(on: database).wait()
