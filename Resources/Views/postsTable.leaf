@@ -18,6 +18,7 @@
 #else:
     <h2>There aren’t any posts yet!</h2>
 #endif
+
 <a href="/posts/create" class="nav-link">
-Create a Post
+Add New Post
 </a>

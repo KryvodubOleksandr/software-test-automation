@@ -11,12 +11,12 @@ struct WebsiteController: RouteCollection {
     authSessionsRoutes.get("register", use: registerHandler)
     authSessionsRoutes.post("register", use: registerPostHandler)
     
-    authSessionsRoutes.get(use: indexHandler)
     authSessionsRoutes.get("posts", ":postID", use: postHandler)
     authSessionsRoutes.get("users", ":userID", use: userHandler)
     authSessionsRoutes.get("comments", ":commentID", use: commentHandler)
     
     let protectedRoutes = authSessionsRoutes.grouped(User.redirectMiddleware(path: "/login"))
+    protectedRoutes.get(use: indexHandler)
     protectedRoutes.get("posts", "create", use: renderCreatePostHandler)
     protectedRoutes.post("posts", "create", use: createPostHandler)
     protectedRoutes.get("posts", ":postID", "edit", use: renderEditPostHandler)
@@ -247,7 +247,7 @@ struct CommentContext: Encodable {
 }
 
 struct CreatePostContext: Encodable {
-  let title = "Create a Post"
+  let title = "Add New Post"
   let csrfToken: String
 }
 
