@@ -1,26 +1,17 @@
-# 1
 version: '3'
-# 2
 services:
-  # 3
-  til-app:
-    # 4
+    til-app:
     depends_on:
-      - postgres
-    # 5
+        - postgres
     build:
-      context: .
-      dockerfile: testing.Dockerfile
-    # 6
+        context: .
+        dockerfile: testing.Dockerfile
     environment:
-      - DATABASE_HOST=postgres
-      - DATABASE_PORT=5432
-  # 7
-  postgres:
-    # 8
+        - DATABASE_HOST=postgres
+        - DATABASE_PORT=5432
+    postgres:
     image: "postgres"
-    # 9
     environment:
-      - POSTGRES_DB=vapor-test
-      - POSTGRES_USER=vapor_username
-      - POSTGRES_PASSWORD=vapor_password
+        - POSTGRES_DB=vapor-test
+        - POSTGRES_USER=vapor_username
+        - POSTGRES_PASSWORD=vapor_password
