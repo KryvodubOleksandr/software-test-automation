@@ -5,6 +5,8 @@ struct CreateComment: Migration {
         database.schema("comments")
             .id()
             .field("name", .string, .required)
+            .field("message", .string, .required)
+            .field("postID", .uuid, .required, .references("posts", "id"))
             .create()
     }
     

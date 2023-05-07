@@ -19,7 +19,7 @@ final class Post: Model {
     @Parent(key: "userID")
     var user: User
     
-    @Siblings(through: PostCommentPivot.self, from: \.$post, to: \.$comment)
+    @Children(for: \.$post)
     var comments: [Comment]
     
     init() {}

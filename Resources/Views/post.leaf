@@ -9,19 +9,34 @@
       <h3>Comments</h3>
       <ul>
         #for(comment in comments):
-          <li>
-            <a href="/comments/#(comment.id)">
-              #(comment.name)
-            </a>
-          </li>
+          <li>#(comment.name): #(comment.message)</li>
         #endfor
       </ul>
     #endif
 
     <form method="post" action="/posts/#(post.id)/delete">
-      <a class="btn btn-primary" href="/posts/#(post.id)/edit"
-      role="button">Edit</a>&nbsp;
       <input class="btn btn-danger" type="submit" value="Delete" />
+    </form>
+    <br>
+    <h4>Add a comment</h4>
+
+    <form method="post">
+      #if(csrfToken):
+        <input type="hidden" name="csrfToken" value="#(csrfToken)">
+      #endif
+      <input type="hidden" name="postId" value="#(post.id)">
+      
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" name="name" class="form-control" id="name"/>
+      </div>
+      
+      <div class="form-group">
+        <label for="body">Message</label>
+        <textarea type="text" name="message" class="form-control" id="message" rows="5"></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Add Comment</button>
     </form>
   #endexport
 #endextend

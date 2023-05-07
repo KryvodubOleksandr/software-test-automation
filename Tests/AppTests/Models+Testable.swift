@@ -56,9 +56,10 @@ extension Post {
 extension App.Comment {
     static func create(
         name: String = "Random",
+        message: String = "Text message",
         on database: Database
     ) throws -> App.Comment {
-        let comment = Comment(name: name)
+        let comment = Comment(name: name, message: message, postID: UUID())
         try comment.save(on: database).wait()
         return comment
     }

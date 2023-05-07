@@ -13,15 +13,14 @@ struct WebsiteController: RouteCollection {
         
         authSessionsRoutes.get("posts", ":postID", use: postHandler)
         authSessionsRoutes.get("users", ":userID", use: userHandler)
-        authSessionsRoutes.get("comments", ":commentID", use: commentHandler)
         
         let protectedRoutes = authSessionsRoutes.grouped(User.redirectMiddleware(path: "/login"))
         protectedRoutes.get(use: indexHandler)
         protectedRoutes.get("posts", "create", use: renderCreatePostHandler)
         protectedRoutes.post("posts", "create", use: createPostHandler)
-        protectedRoutes.get("posts", ":postID", "edit", use: renderEditPostHandler)
-        protectedRoutes.post("posts", ":postID", "edit", use: editPostHandler)
+        
         protectedRoutes.post("posts", ":postID", "delete", use: deletePostHandler)
+        protectedRoutes.post("posts", ":postID", use: createCommentHandler)
     }
     
     func indexHandler(_ req: Request) -> EventLoopFuture<View> {
@@ -57,15 +56,6 @@ struct WebsiteController: RouteCollection {
         }
     }
     
-    func commentHandler(_ req: Request) -> EventLoopFuture<View> {
-        Comment.find(req.parameters.get("commentID"), on: req.db).unwrap(or: Abort(.notFound)).flatMap { comment in
-            comment.$posts.get(on: req.db).flatMap { posts in
-                let context = CommentContext(title: comment.name, comment: comment, posts: posts)
-                return req.view.render("comment", context)
-            }
-        }
-    }
-    
     func renderCreatePostHandler(_ req: Request) -> EventLoopFuture<View> {
         let token = [UInt8].random(count: 16).base64
         let context = CreatePostContext(csrfToken: token)
@@ -87,71 +77,26 @@ struct WebsiteController: RouteCollection {
         }
         
         let post = try Post(title: data.title, description: data.description, body: data.body, userID: user.requireID())
-        return post.save(on: req.db).flatMap {
-            guard let id = post.id else {
-                return req.eventLoop.future(error: Abort(.internalServerError))
-            }
-            var commentSaves: [EventLoopFuture<Void>] = []
-            for comment in data.comments ?? [] {
-                commentSaves.append(Comment.addComment(comment, to: post, on: req))
-            }
-            let redirect = req.redirect(to: "/")
-            return commentSaves.flatten(on: req.eventLoop).transform(to: redirect)
-        }
+        let redirect = req.redirect(to: "/")
+        return post.save(on: req.db).transform(to: redirect)
     }
     
-    func renderEditPostHandler(_ req: Request) -> EventLoopFuture<View> {
-        return Post.find(req.parameters.get("postID"), on: req.db).unwrap(or: Abort(.notFound)).flatMap { post in
-            post.$comments.get(on: req.db).flatMap { comments in
-                let context = EditPostContext(post: post, comments: comments)
-                return req.view.render("createPost", context)
-            }
-        }
-    }
-    
-    func editPostHandler(_ req: Request) throws -> EventLoopFuture<Response> {
-        let user = try req.auth.require(User.self)
-        let userID = try user.requireID()
-        let updateData = try req.content.decode(CreatePostFormData.self)
-        return Post.find(req.parameters.get("postID"), on: req.db).unwrap(or: Abort(.notFound)).flatMap { post in
-            post.title = updateData.title
-            post.body = updateData.body
-            post.$user.id = userID
-            guard let id = post.id else {
-                return req.eventLoop.future(error: Abort(.internalServerError))
-            }
-            return post.save(on: req.db).flatMap {
-                post.$comments.get(on: req.db)
-            }.flatMap { existingComments in
-                let existingStringArray = existingComments.map {
-                    $0.name
-                }
-                
-                let existingSet = Set<String>(existingStringArray)
-                let newSet = Set<String>(updateData.comments ?? [])
-                
-                let commentsToAdd = newSet.subtracting(existingSet)
-                let commentsToRemove = existingSet.subtracting(newSet)
-                
-                var commentResults: [EventLoopFuture<Void>] = []
-                for newComment in commentsToAdd {
-                    commentResults.append(Comment.addComment(newComment, to: post, on: req))
-                }
-                
-                for commentNameToRemove in commentsToRemove {
-                    let commentToRemove = existingComments.first {
-                        $0.name == commentNameToRemove
-                    }
-                    if let comment = commentToRemove {
-                        commentResults.append(
-                            post.$comments.detach(comment, on: req.db))
-                    }
-                }
-                
-                let redirect = req.redirect(to: "/posts/\(id)")
-                return commentResults.flatten(on: req.eventLoop).transform(to: redirect)
-            }
-        }
+    func createCommentHandler(_ req: Request) throws -> EventLoopFuture<Response> {
+        let data = try req.content.decode(CreateCommentFormData.self)
+//        let user = try req.auth.require(User.self)
+        
+//        let expectedToken = req.session.data["CSRF_TOKEN"]
+//        req.session.data["CSRF_TOKEN"] = nil
+//        guard
+//            let csrfToken = data.csrfToken,
+//            expectedToken == csrfToken
+//        else {
+//            throw Abort(.badRequest)
+//        }
+        
+        let comment = Comment(name: data.name, message: data.message, postID: data.postId)
+        let redirect = req.redirect(to: "/")
+        return comment.save(on: req.db).transform(to: redirect)
     }
     
     func deletePostHandler(_ req: Request) -> EventLoopFuture<Response> {
@@ -241,29 +186,22 @@ struct UserContext: Encodable {
     let posts: [Post]
 }
 
-struct CommentContext: Encodable {
-    let title: String
-    let comment: Comment
-    let posts: [Post]
-}
-
 struct CreatePostContext: Encodable {
     let title = "Add New Post"
     let csrfToken: String
-}
-
-struct EditPostContext: Encodable {
-    let title = "Edit Post"
-    let post: Post
-    let editing = true
-    let comments: [Comment]
 }
 
 struct CreatePostFormData: Content {
     let title: String
     let description: String
     let body: String
-    let comments: [String]?
+    let csrfToken: String?
+}
+
+struct CreateCommentFormData: Content {
+    let name: String
+    let message: String
+    let postId: Post.IDValue
     let csrfToken: String?
 }
 
