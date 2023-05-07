@@ -1,5 +1,12 @@
 #extend("base"):
   #export("content"):
+  
+    #if(message):
+        <div class="alert alert-success" role="alert">
+            #(message)
+        </div>
+    #endif
+  
     <h1>Posts</h1>
     #extend("postsTable")
   #endexport

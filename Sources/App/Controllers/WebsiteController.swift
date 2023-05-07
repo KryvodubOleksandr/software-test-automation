@@ -27,7 +27,10 @@ struct WebsiteController: RouteCollection {
         Post.query(on: req.db).all().flatMap { posts in
             let userLoggedIn = req.auth.has(User.self)
             let showCookieMessage = req.cookies["cookies-accepted"] == nil
-            let context = IndexContext(title: "Home page", posts: posts, userLoggedIn: userLoggedIn, showCookieMessage: showCookieMessage)
+            var context = IndexContext(title: "Home page", posts: posts, userLoggedIn: userLoggedIn, showCookieMessage: showCookieMessage, message: nil)
+            if let message = req.query[String.self, at: "message"] {
+                context.message = message
+            }
             return req.view.render("index", context)
         }
     }
@@ -77,7 +80,8 @@ struct WebsiteController: RouteCollection {
         }
         
         let post = try Post(title: data.title, description: data.description, body: data.body, userID: user.requireID())
-        let redirect = req.redirect(to: "/")
+        let message = "Blog Post posted successfully!"
+        let redirect = req.redirect(to: "/?message=\(message)")
         return post.save(on: req.db).transform(to: redirect)
     }
     
@@ -95,7 +99,8 @@ struct WebsiteController: RouteCollection {
 //        }
         
         let comment = Comment(name: data.name, message: data.message, postID: data.postId)
-        let redirect = req.redirect(to: "/")
+        let message = "Comment added to the Post successfully!"
+        let redirect = req.redirect(to: "/?message=\(message)")
         return comment.save(on: req.db).transform(to: redirect)
     }
     
@@ -171,6 +176,7 @@ struct IndexContext: Encodable {
     let posts: [Post]
     let userLoggedIn: Bool
     let showCookieMessage: Bool
+    var message: String?
 }
 
 struct PostContext: Encodable {
