@@ -12,7 +12,7 @@
 
   <link rel="stylesheet" href="/styles/style.css">
 
-  <title>#(title) | Posts</title>
+<!--  <title>#(title) | Posts</title>-->
 </head>
 <body>
   <nav class="navbar navbar-expand-md navbar-dark bg-dark">
@@ -29,23 +29,15 @@
         <li class="nav-item #if(title == "Home page"): active #endif">
           <a href="/" class="nav-link">Home</a>
         </li>
-<!--        <li class="nav-item #if(title == "Create a Post"): active #endif">-->
-<!--          <a href="/posts/create" class="nav-link">-->
-<!--            Create a Post-->
-<!--          </a>-->
-<!--        </li>-->
-        #if(!userLoggedIn):
-          <!-- 2 -->
-          <li class="nav-item #if(title == "Register"): active #endif">
-            <!-- 3 -->
-            <a href="/register" class="nav-link">Register</a>
-          </li>
-        #endif
+        <li class="nav-item #if(title == "Register"): active #endif">
+          <a href="/register" class="nav-link">Register</a>
+        </li>
+<!--        #if(!userLoggedIn):-->
+<!--        #endif-->
       </ul>
       #if(userLoggedIn):
         <form class="form-inline" action="/logout" method="POST">
-          <input class="nav-link btn btn-secondary mr-sm-2" type="submit"
-          value="Log out">
+          <input class="btn btn-secondary btn-sm" type="submit" value="Log out">
         </form>
       #endif
     </div>
@@ -55,19 +47,15 @@
     #import("content")
   </div>
 
-  <!-- 1 -->
   #if(showCookieMessage):
-    <!-- 2 -->
     <footer id="cookie-footer">
       <div id="cookieMessage" class="container">
         <span class="muted">
-          <!-- 3 -->
           This site uses cookies! To accept this, click
           <a href="#" onclick="cookiesConfirmed()">OK</a>
         </span>
       </div>
     </footer>
-    <!-- 4 -->
     <script src="/scripts/cookies.js"></script>
   #endif
 

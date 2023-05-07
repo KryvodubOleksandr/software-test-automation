@@ -1,12 +1,18 @@
 #extend("base"):
   #export("content"):
-    <h1>#(post.title)</h1>
-    <h2>#(post.body)</h2>
+    <h2>#(post.title)</h2>
+    <h5>#(post.description)</h5>
+    #(post.body)
+    <br>
+    <br>
+    <p>Created by <a href="/users/#(user.id)/" align="right">#(user.username)</a></p>
 
-    <p>Created by <a href="/users/#(user.id)/">#(user.username)</a></p>
+<!--    <form method="post" action="/posts/#(post.id)/delete">-->
+<!--      <input class="btn btn-danger" type="submit" value="Delete"/>-->
+<!--    </form>-->
 
     #if(count(comments) > 0):
-      <h3>Comments</h3>
+      <h5>Comments</h5>
       <ul>
         #for(comment in comments):
           <li>#(comment.name): #(comment.message)</li>
@@ -14,11 +20,7 @@
       </ul>
     #endif
 
-    <form method="post" action="/posts/#(post.id)/delete">
-      <input class="btn btn-danger" type="submit" value="Delete" />
-    </form>
-    <br>
-    <h4>Add a comment</h4>
+    <h5>Add a comment</h5>
 
     <form method="post">
       #if(csrfToken):
@@ -35,8 +37,7 @@
         <label for="body">Message</label>
         <textarea type="text" name="message" class="form-control" id="message" rows="5"></textarea>
       </div>
-
-      <button type="submit" class="btn btn-primary">Add Comment</button>
+      <button type="submit" class="btn btn-primary" align="right">Add Comment</button>
       <br>
     </form>
   #endexport
