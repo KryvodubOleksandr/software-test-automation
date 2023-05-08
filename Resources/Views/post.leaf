@@ -5,7 +5,7 @@
     #(post.body)
     <br>
     <br>
-    <p>Created by <a href="/users/#(user.id)/" align="right">#(user.username)</a></p>
+    <p>Created by <a href="/users/#(user.id)/">#(user.username)</a></p>
 
 <!--    <form method="post" action="/posts/#(post.id)/delete">-->
 <!--      <input class="btn btn-danger" type="submit" value="Delete"/>-->

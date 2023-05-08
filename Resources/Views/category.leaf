@@ -1,7 +1,0 @@
-#extend("base"):
-  #export("content"):
-    <h1>#(comment.name)</h1>
-    
-    #extend("postsTable")
-  #endexport
-#endextend

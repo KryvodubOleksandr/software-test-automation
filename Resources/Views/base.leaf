@@ -29,11 +29,14 @@
         <li class="nav-item #if(title == "Home page"): active #endif">
           <a href="/" class="nav-link">Home</a>
         </li>
+        <li class="nav-item #if(title == "My Profile"): active #endif">
+          <a href="/profile" class="nav-link">My Profile</a>
+        </li>
+        #if(!userLoggedIn):
         <li class="nav-item #if(title == "Register"): active #endif">
           <a href="/register" class="nav-link">Register</a>
         </li>
-<!--        #if(!userLoggedIn):-->
-<!--        #endif-->
+        #endif
       </ul>
       #if(userLoggedIn):
         <form class="form-inline" action="/logout" method="POST">

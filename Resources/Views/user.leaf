@@ -1,7 +1,6 @@
 #extend("base"):
   #export("content"):
     <h1>#(user.username)</h1>
-    
-    #extend("postsTable")
+    <h2>#(user.email)</h2>
   #endexport
 #endextend
