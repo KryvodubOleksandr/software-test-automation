@@ -9,7 +9,7 @@ struct CreateUser: Migration {
             .field("password", .string, .required)
             .field("firstname", .string)
             .field("lastname", .string)
-            .field("age", .int8)
+            .field("age", .string)
             .field("gender", .string)
             .field("address", .string)
             .field("website", .string)

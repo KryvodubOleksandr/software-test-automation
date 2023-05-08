@@ -60,7 +60,7 @@ extension XCTApplicationTester {
                     email: "test@mail.com",
                     firstname: "Oleksandr",
                     lastname: "Kryvodub",
-                    age: 33,
+                    age: "33",
                     gender: "male",
                     address: "Ukraine",
                     website: "github.com"

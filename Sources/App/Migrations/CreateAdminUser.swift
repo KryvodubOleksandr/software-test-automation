@@ -15,7 +15,7 @@ struct CreateAdminUser: Migration {
             email: "admin@localhost.local",
             firstname: "firstname",
             lastname: "lastname",
-            age: 25,
+            age: "25",
             gender: "gender",
             address: "address",
             website: "website"

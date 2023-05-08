@@ -16,23 +16,23 @@ final class User: Model, Content {
     @Field(key: "email")
     var email: String
     
-    @Field(key: "firstname")
-    var firstname: String
+    @OptionalField(key: "firstname")
+    var firstname: String?
     
-    @Field(key: "lastname")
-    var lastname: String
+    @OptionalField(key: "lastname")
+    var lastname: String?
     
-    @Field(key: "age")
-    var age: Int
+    @OptionalField(key: "age")
+    var age: String?
     
-    @Field(key: "gender")
-    var gender: String
+    @OptionalField(key: "gender")
+    var gender: String?
     
-    @Field(key: "address")
-    var address: String
+    @OptionalField(key: "address")
+    var address: String?
     
-    @Field(key: "website")
-    var website: String
+    @OptionalField(key: "website")
+    var website: String?
     
     @Children(for: \.$user)
     var posts: [Post]
@@ -43,12 +43,12 @@ final class User: Model, Content {
          username: String,
          password: String,
          email: String,
-         firstname: String,
-         lastname: String,
-         age: Int,
-         gender: String,
-         address: String,
-         website: String
+         firstname: String? = nil,
+         lastname: String? = nil,
+         age: String? = nil,
+         gender: String? = nil,
+         address: String? = nil,
+         website: String? = nil
     ) {
         self.username = username
         self.password = password
@@ -65,23 +65,23 @@ final class User: Model, Content {
         var id: UUID?
         var username: String
         var email: String
-        var firstname: String
-        var lastname: String
-        var age: Int
-        var gender: String
-        var address: String
-        var website: String
+        var firstname: String?
+        var lastname: String?
+        var age: String?
+        var gender: String?
+        var address: String?
+        var website: String?
         
         init(
             id: UUID?,
             username: String,
             email: String,
-            firstname: String,
-            lastname: String,
-            age: Int,
-            gender: String,
-            address: String,
-            website: String
+            firstname: String? = nil,
+            lastname: String? = nil,
+            age: String? = nil,
+            gender: String? = nil,
+            address: String? = nil,
+            website: String? = nil
         ) {
             self.id = id
             self.username = username
