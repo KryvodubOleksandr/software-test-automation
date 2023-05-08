@@ -16,33 +16,99 @@ final class User: Model, Content {
     @Field(key: "email")
     var email: String
     
+    @Field(key: "firstname")
+    var firstname: String
+    
+    @Field(key: "lastname")
+    var lastname: String
+    
+    @Field(key: "age")
+    var age: Int
+    
+    @Field(key: "gender")
+    var gender: String
+    
+    @Field(key: "address")
+    var address: String
+    
+    @Field(key: "website")
+    var website: String
+    
     @Children(for: \.$user)
     var posts: [Post]
     
     init() {}
     
-    init(id: UUID? = nil, username: String, password: String, email: String) {
+    init(id: UUID? = nil,
+         username: String,
+         password: String,
+         email: String,
+         firstname: String,
+         lastname: String,
+         age: Int,
+         gender: String,
+         address: String,
+         website: String
+    ) {
         self.username = username
         self.password = password
         self.email = email
+        self.firstname = firstname
+        self.lastname = lastname
+        self.age = age
+        self.gender = gender
+        self.address = address
+        self.website = website
     }
     
     final class Public: Content {
         var id: UUID?
         var username: String
         var email: String
+        var firstname: String
+        var lastname: String
+        var age: Int
+        var gender: String
+        var address: String
+        var website: String
         
-        init(id: UUID?, username: String, email: String) {
+        init(
+            id: UUID?,
+            username: String,
+            email: String,
+            firstname: String,
+            lastname: String,
+            age: Int,
+            gender: String,
+            address: String,
+            website: String
+        ) {
             self.id = id
             self.username = username
             self.email = email
+            self.firstname = firstname
+            self.lastname = lastname
+            self.age = age
+            self.gender = gender
+            self.address = address
+            self.website = website
         }
     }
 }
 
 extension User {
     func convertToPublic() -> User.Public {
-        return User.Public(id: id, username: username, email: email)
+        return User.Public(
+            id: id,
+            username: username,
+            email: email,
+            firstname: firstname,
+            lastname: lastname,
+            age: age,
+            gender: gender,
+            address: address,
+            website: website
+        )
     }
 }
 

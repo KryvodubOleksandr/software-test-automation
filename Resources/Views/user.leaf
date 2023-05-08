@@ -1,6 +1,18 @@
 #extend("base"):
   #export("content"):
     <h1>#(user.username)</h1>
-    <h2>#(user.email)</h2>
+    <h3>#(user.email)</h3>
+    First name: #(user.firstname)
+    <br>
+    Last name: #(user.lastname)
+    <br>
+    Age: #(user.age)
+    <br>
+    Gender: #(user.gender)
+    <br>
+    Address: #(user.address)
+    <br>
+    Website: <a href="#(user.website)">#(user.website)</a>
+    <br>
   #endexport
 #endextend

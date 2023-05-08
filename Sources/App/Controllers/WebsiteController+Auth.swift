@@ -62,7 +62,13 @@ extension WebsiteController {
         let user = User(
             username: data.username,
             password: password,
-            email: data.email
+            email: data.email,
+            firstname: "Oleksandr",
+            lastname: "Kryvodub",
+            age: 33,
+            gender: "male",
+            address: "Ukraine",
+            website: "github.com"
         )
         return user.save(on: req.db).map {
             req.auth.login(user)

@@ -22,7 +22,13 @@ extension User {
         let user = User(
             username: createUsername,
             password: password,
-            email: "\(createUsername)@mail.com"
+            email: "\(createUsername)@mail.com",
+            firstname: "Oleksandr",
+            lastname: "Kryvodub",
+            age: 33,
+            gender: "male",
+            address: "Ukraine",
+            website: "github.com"
         )
         try user.save(on: database).wait()
         return user
