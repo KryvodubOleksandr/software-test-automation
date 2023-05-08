@@ -23,16 +23,28 @@ struct WebsiteController: RouteCollection {
         protectedRoutes.post("posts", ":postID", use: createCommentHandler)
     }
     
-    func indexHandler(_ req: Request) -> EventLoopFuture<View> {
-        Post.query(on: req.db).all().flatMap { posts in
-            let userLoggedIn = req.auth.has(User.self)
-            let showCookieMessage = req.cookies["cookies-accepted"] == nil
-            var context = IndexContext(title: "Home page", posts: posts, userLoggedIn: userLoggedIn, showCookieMessage: showCookieMessage, message: nil)
-            if let message = req.query[String.self, at: "message"] {
-                context.message = message
-            }
-            return req.view.render("index", context)
+    func indexHandler(_ req: Request) async throws -> View {
+        let userLoggedIn = req.auth.has(User.self)
+        let showCookieMessage = req.cookies["cookies-accepted"] == nil
+        let posts = try await Post.query(on: req.db).all()
+
+        var postsWithComments: [PostWithComments] = []
+        for post in posts {
+            let comments = try await post.$comments.get(on: req.db)
+            postsWithComments.append(.init(post: post, comments: comments))
         }
+
+        var context = IndexContext(
+            title: "Home page",
+            posts: postsWithComments,
+            userLoggedIn: userLoggedIn,
+            showCookieMessage: showCookieMessage,
+            message: nil
+        )
+        if let message = req.query[String.self, at: "message"] {
+            context.message = message
+        }
+        return try await req.view.render("index", context)
     }
     
     func postHandler(_ req: Request) -> EventLoopFuture<View> {
@@ -173,7 +185,7 @@ struct WebsiteController: RouteCollection {
 
 struct IndexContext: Encodable {
     let title: String
-    let posts: [Post]
+    let posts: [PostWithComments]
     let userLoggedIn: Bool
     let showCookieMessage: Bool
     var message: String?
@@ -183,6 +195,11 @@ struct PostContext: Encodable {
     let title: String
     let post: Post
     let user: User
+    let comments: [Comment]
+}
+
+struct PostWithComments: Encodable {
+    let post: Post
     let comments: [Comment]
 }
 

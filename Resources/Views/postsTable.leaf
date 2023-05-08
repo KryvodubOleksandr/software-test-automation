@@ -5,9 +5,19 @@
         #for(post in posts):
         <tr>
             <td>
-            <h3><a href="/posts/#(post.id)">#(post.title)</a></h3>
-            <h4>#(post.description)</h4>
-            #(post.body)
+            <h3><a href="/posts/#(post.post.id)">#(post.post.title)</a></h3>
+            <h4>#(post.post.description)</h4>
+            #(post.post.body)
+            <br>
+            <br>
+            #if(count(post.comments) > 0):
+              <h5>Comments</h5>
+              <ul>
+                #for(comment in post.comments):
+                  <li>#(comment.name): #(comment.message)</li>
+                #endfor
+              </ul>
+            #endif
             </td>
         </tr>
         #endfor
