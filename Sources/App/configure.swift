@@ -2,6 +2,7 @@ import Fluent
 import FluentPostgresDriver
 import Vapor
 import Leaf
+import SendGrid
 
 public func configure(_ app: Application) throws {
     // uncomment to serve files from /Public folder
@@ -35,6 +36,7 @@ public func configure(_ app: Application) throws {
     app.migrations.add(CreateComment())
     app.migrations.add(CreateToken())
     app.migrations.add(CreateAdminUser())
+    app.migrations.add(CreateResetPasswordToken())
     
     app.http.server.configuration.hostname = "0.0.0.0"
     
@@ -42,6 +44,7 @@ public func configure(_ app: Application) throws {
     
     try app.autoMigrate().wait()
     
+    app.sendgrid.initialize()
     app.views.use(.leaf)
     
     // register routes
