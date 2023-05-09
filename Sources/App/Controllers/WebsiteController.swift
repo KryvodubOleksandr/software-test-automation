@@ -22,6 +22,8 @@ struct WebsiteController: RouteCollection {
         let protectedRoutes = authSessionsRoutes.grouped(User.redirectMiddleware(path: "/login"))
         protectedRoutes.get(use: indexHandler)
         protectedRoutes.get("profile", use: profileHandler)
+        protectedRoutes.get("profile", "edit", use: editProfileHandler)
+        protectedRoutes.post("profile", "edit", use: editProfilePostHandler)
         protectedRoutes.get("posts", "create", use: renderCreatePostHandler)
         protectedRoutes.post("posts", "create", use: createPostHandler)
         
@@ -70,6 +72,33 @@ struct WebsiteController: RouteCollection {
             return try await req.view.render("/login")
         }
     }
+    
+    func editProfileHandler(_ req: Request) async throws -> View {
+        if let user = req.auth.get(User.self) {
+            let context = EditProfileContext(user: user, userLoggedIn: true)
+            return try await req.view.render("editProfile", context)
+        } else {
+            return try await req.view.render("login")
+        }
+    }
+    
+    func editProfilePostHandler(_ req: Request) async throws -> Response {
+        if var user = req.auth.get(User.self) {
+            let updateData = try req.content.decode(EditProfileFormData.self)
+            user.firstname = updateData.firstname
+            user.lastname = updateData.lastname
+            user.age = updateData.age
+            user.gender = updateData.gender
+            user.address = updateData.address
+            user.website = updateData.website
+
+            try await user.save(on: req.db)
+            let message = "Profile updated successfully!"
+            return req.redirect(to: "/?message=\(message)")
+        } else {
+            return req.redirect(to: "login")
+        }
+    }
 }
 
 struct IndexContext: Encodable {
@@ -90,4 +119,19 @@ struct ProfileContext: Encodable {
     let title: String
     let user: User
     let userLoggedIn: Bool
+}
+
+struct EditProfileContext: Encodable {
+    let title = "My Profile"
+    let user: User
+    let userLoggedIn: Bool
+}
+
+struct EditProfileFormData: Content {
+    let firstname: String
+    let lastname: String
+    let age: String
+    let gender: String
+    let address: String
+    let website: String
 }

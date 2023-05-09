@@ -14,5 +14,9 @@
     <br>
     Website: <a href="#(user.website)">#(user.website)</a>
     <br>
+    <br>
+    <form method="get" action="/profile/edit">
+      <input class="btn btn-primary" type="submit" value="Edit profile"/>
+    </form>
   #endexport
 #endextend
