@@ -12,5 +12,6 @@ xcuserdata
 DerivedData/
 .DS_Store
 .swiftpm
+*.yml
 
 # End of https://www.gitignore.io/api/vapor
