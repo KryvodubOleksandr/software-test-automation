@@ -3,21 +3,17 @@ import Fluent
 import Vapor
 
 extension User {
-    // 1
     static func create(
         username: String? = nil,
         on database: Database
     ) throws -> User {
         let createUsername: String
-        // 2
         if let suppliedUsername = username {
             createUsername = suppliedUsername
-            // 3
         } else {
             createUsername = UUID().uuidString
         }
         
-        // 4
         let password = try Bcrypt.hash("password")
         let user = User(
             username: createUsername,
