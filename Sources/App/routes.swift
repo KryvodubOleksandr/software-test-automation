@@ -8,4 +8,13 @@ func routes(_ app: Application) throws {
     
     let websiteController = WebsiteController()
     try app.register(collection: websiteController)
+    
+    let postsController = PostsController()
+    try app.register(collection: postsController)
+    
+    let usersController = UsersController()
+    try app.register(collection: usersController)
+    
+    let commentsController = CommentsController()
+    try app.register(collection: commentsController)
 }
